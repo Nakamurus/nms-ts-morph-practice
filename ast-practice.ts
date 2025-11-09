@@ -34,3 +34,61 @@ const hooks = sourceFiles.flatMap((sf) => {
 });
 
 console.log("hooks", hooks.map((hook) => hook.getName()));
+
+const renameIncrementButtonToCounterButton = (): void => {
+  const incrementButtonDirs = project.getDirectories().filter((dir) =>
+    dir.getPath().includes("incrementButton")
+  );
+
+  console.log(`Found ${incrementButtonDirs.length} directories to rename`);
+  for (const dir of incrementButtonDirs) {
+    const newPath = dir.getPath().replace("incrementButton", "counterButton");
+    console.log(`  Moving directory: ${dir.getBaseName()} -> ${newPath}`);
+    dir.move(newPath);
+  }
+
+  const incrementButtonFiles = project.getSourceFiles().filter((sf) =>
+    sf.getFilePath().includes("IncrementButton")
+  );
+
+  console.log(`\nFound ${incrementButtonFiles.length} files to rename`);
+  for (const file of incrementButtonFiles) {
+    const newFilePath = file
+      .getFilePath()
+      .replace("IncrementButton", "CounterButton");
+    console.log(`  Moving: ${file.getBaseName()} -> ${newFilePath}`);
+    file.move(newFilePath);
+  }
+
+  for (const sf of project.getSourceFiles()) {
+    console.log(`\nProcessing file: ${sf.getBaseName()}`);
+  
+    const statements = sf.getStatements();
+    console.log(`  Total statements: ${statements.length}`);
+    
+    for (const statement of statements) {
+      const stmtKind = statement.getKind();
+      const kindName = ts.SyntaxKind[stmtKind];
+      console.log(`  Statement kind: ${kindName}`);
+      
+      if (stmtKind === ts.SyntaxKind.TypeAliasDeclaration
+        || stmtKind === ts.SyntaxKind.InterfaceDeclaration
+        || stmtKind === ts.SyntaxKind.FunctionDeclaration
+        || stmtKind === ts.SyntaxKind.VariableDeclaration
+      ) {
+        const declaration = statement as ts.TypeAliasDeclaration | ts.InterfaceDeclaration | ts.FunctionDeclaration | ts.VariableDeclaration;
+        const name = declaration.getName();
+        console.log(`    Found ${kindName}: ${name}`);
+        if (name?.includes("IncrementButton")) {
+          const newName = name.replace(/IncrementButton/g, "CounterButton");
+          console.log(`    -> Renaming ${name} to ${newName}`);
+          declaration.rename(newName);
+        }
+      }
+    }
+  }
+};
+
+renameIncrementButtonToCounterButton();
+
+project.save();
