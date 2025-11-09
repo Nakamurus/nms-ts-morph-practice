@@ -91,4 +91,39 @@ const renameIncrementButtonToCounterButton = (): void => {
 
 renameIncrementButtonToCounterButton();
 
-project.save();
+// traverse from main.tsx recursively until leaf nodes
+// change indentation based on depth
+const traverse = (startsWith: string, depth = 0) => {
+  if (depth === 0) {
+    console.log(`Starting traversal from: ${startsWith}`);
+  }
+  const file = project.getSourceFile(startsWith);
+  if (!file) {
+    console.error(`${startsWith} not found`);
+    return;
+  }
+
+  const importDeclarations = file.getImportDeclarations();
+  const ignorePattern = (importDeclaration: string) => {
+    const isRelative = importDeclaration.startsWith(".") || importDeclaration.startsWith("/");
+    return !isRelative;
+  }
+  for (const importDecl of importDeclarations) {
+    const moduleSpecifier = importDecl.getModuleSpecifierValue();
+    if (ignorePattern(moduleSpecifier)) {
+      continue;
+    }
+    const indent = "   ".repeat(depth);
+    // change log to X imports Y style
+    console.log(`${indent}|--${file.getBaseName()} imports ${moduleSpecifier}`);
+    const importedFile = importDecl.getModuleSpecifierSourceFile();
+    if (importedFile) {
+      // Further traversal logic can be added here
+      traverse(importedFile.getFilePath(), depth + 1);
+    }
+  }
+};
+
+traverse("src/main.tsx");
+
+// project.save();
