@@ -126,4 +126,42 @@ const traverse = (startsWith: string, depth = 0) => {
 
 traverse("src/main.tsx");
 
+// traverse recursively upwards from a file which contains a specific pattern
+const traverseUpwards = (pattern: string) => {
+  const targetFile = project.getSourceFiles().find((sf) =>
+    sf.getFullText().includes(pattern)
+  );
+
+  if (!targetFile) {
+    console.error(`No file contains the pattern: ${pattern}`);
+    return;
+  }
+
+  console.log(`Starting upwards traversal from file: ${targetFile.getBaseName()}`);
+
+  const queue: ts.SourceFile[] = [targetFile];
+  const visited = new Set<ts.SourceFile>();
+  let depth = -1;
+  while (queue.length > 0) {
+    depth += 1;
+    const currentFile = queue.shift();
+    if (!currentFile || visited.has(currentFile)) {
+      continue;
+    }
+    visited.add(currentFile);
+
+    const importDeclarations = currentFile.getImportDeclarations();
+    for (const importDecl of importDeclarations) {
+      const importedFile = importDecl.getModuleSpecifierSourceFile();
+      if (importedFile && !visited.has(importedFile)) {
+        const indent = "   ".repeat(depth);
+        console.log(`${indent}|--${currentFile.getBaseName()} is imported by ${importedFile.getBaseName()}`);
+        queue.push(importedFile);
+      }
+    }
+  }
+}
+
+traverseUpwards("useButton");
+
 // project.save();
