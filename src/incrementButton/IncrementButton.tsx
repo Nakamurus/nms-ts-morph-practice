@@ -5,7 +5,11 @@ type IncrementButtonProps = {
   decrementButtonLabel?: string;
 };
 
-export const IncrementButton = (props: IncrementButtonProps) => {
+export function IncrementButton(props: IncrementButtonProps) {
+  return <IncrementButtonInternal {...props} />;
+}
+
+const IncrementButtonInternal = (props: IncrementButtonProps) => {
   const { decrement, increment, count } = useButton(0);
   return (
     <>
