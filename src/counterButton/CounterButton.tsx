@@ -1,15 +1,15 @@
 import { useButton } from "./hook";
 
-type IncrementButtonProps = {
+type CounterButtonProps = {
   incrementButtonLabel?: string;
   decrementButtonLabel?: string;
 };
 
-export function IncrementButton(props: IncrementButtonProps) {
+export function CounterButton(props: CounterButtonProps) {
   return <IncrementButtonInternal {...props} />;
 }
 
-const IncrementButtonInternal = (props: IncrementButtonProps) => {
+const IncrementButtonInternal = (props: CounterButtonProps) => {
   const { decrement, increment, count } = useButton(0);
   return (
     <>
